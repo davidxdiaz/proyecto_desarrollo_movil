@@ -1,33 +1,53 @@
-import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, StyleSheet } from 'react-native';
+import React from 'react';
+import { StyleSheet } from 'react-native';
 import { RootTabParamList } from './types';
 
-// Pantallas temporales (Placeholders) para construir el esqueleto
-const HomeScreen = () => <View style={styles.screen}><Text>Home Screen</Text></View>;
-const PerfilesScreen = () => <View style={styles.screen}><Text>Perfiles Screen</Text></View>;
-const DocumentosScreen = () => <View style={styles.screen}><Text>Documentos Screen</Text></View>;
-const AjustesScreen = () => <View style={styles.screen}><Text>Ajustes Screen</Text></View>;
+import { AjustesScreen } from '../screens/AjustesScreen';
+import { DocumentosScreen } from '../screens/DocumentosScreen';
+import { HomeScreen } from '../screens/HomeScreen';
+import { PerfilesScreen } from '../screens/PerfilesScreen';
 
-// Instanciamos el Tab Navigator pasándole nuestro tipado estricto
 const Tab = createBottomTabNavigator<RootTabParamList>();
 
 export const MainTabNavigator = () => {
   return (
     <Tab.Navigator
-      screenOptions={{
-        // Utilizamos el Primary Blue definido en el sistema de diseño para la pestaña activa
-        tabBarActiveTintColor: '#0056B3', 
-        tabBarInactiveTintColor: '#727784',
-        headerShown: true, // Muestra la barra superior (Header) por defecto
-        headerStyle: {
-          backgroundColor: '#F8F9FA', // Background Light Gray 
+      screenOptions={({ route }) => ({
+        // 1. Configuración dinámica de Íconos
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName: keyof typeof Ionicons.glyphMap = 'home';
+
+          // Asignamos el ícono correspondiente según el nombre de la ruta
+          if (route.name === 'Home') {
+            iconName = focused ? 'home' : 'home-outline';
+          } else if (route.name === 'Perfiles') {
+            iconName = focused ? 'people' : 'people-outline';
+          } else if (route.name === 'Documentos') {
+            iconName = focused ? 'document-text' : 'document-text-outline';
+          } else if (route.name === 'Ajustes') {
+            iconName = focused ? 'settings' : 'settings-outline';
+          }
+
+          return <Ionicons name={iconName} size={size} color={color} />;
         },
-        headerTitleStyle: {
-          color: '#0056B3', // Título en color primario
-          fontWeight: '600',
+        // 2. Estilos del sistema de diseño
+        tabBarActiveTintColor: '#0056B3', // Primary Blue[cite: 1]
+        tabBarInactiveTintColor: '#727784', // Outline[cite: 1]
+        headerShown: false, // Ocultamos el header aquí para no duplicarlo
+        tabBarStyle: {
+          backgroundColor: '#FFFFFF',
+          borderTopColor: '#F1F3F4',
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 8,
         },
-      }}
+        tabBarLabelStyle: {
+          fontFamily: 'Inter-Medium',
+          fontSize: 12,
+        }
+      })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Perfiles" component={PerfilesScreen} />
@@ -38,10 +58,5 @@ export const MainTabNavigator = () => {
 };
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F8F9FA', // Fondo general de la app
-  },
+  screen: { flex: 1, justifyContent: 'center', alignItems: 'center' }
 });
