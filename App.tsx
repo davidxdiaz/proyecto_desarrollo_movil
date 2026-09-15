@@ -1,9 +1,10 @@
+import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold } from '@expo-google-fonts/inter';
+import { WorkSans_600SemiBold } from '@expo-google-fonts/work-sans';
 import { NavigationContainer } from '@react-navigation/native';
-import * as Font from 'expo-font';
+import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import React, { useEffect, useState } from 'react';
-import { View } from 'react-native';
-
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Importamos el enrutador de pestañas 
@@ -13,52 +14,64 @@ import { RootNavigator } from './src/navigation/RootNavigator';
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
-  // 2. Estado local para saber si los recursos ya están listos
+  // 2. Cargamos las fuentes (Hook en el nivel superior cumpliendo las Reglas de React)
+  const [fontsLoaded] = useFonts({
+    'Work Sans': WorkSans_600SemiBold,
+    'Inter': Inter_400Regular,
+    'Inter-Medium': Inter_500Medium,
+    'Inter-SemiBold': Inter_600SemiBold,
+  });
+
+  // 3. Estado local para saber si todos los recursos están listos
   const [appIsReady, setAppIsReady] = useState(false);
 
-  // 3. Efecto secundario para cargar recursos asíncronos al montar la app
+  // 4. Efecto para actualizar el estado cuando las dependencias asíncronas terminen
   useEffect(() => {
-    async function prepareResources() {
-      try {
-        // Cargamos las tipografías estrictas del sistema de diseño
-        await Font.loadAsync({
-          'Work Sans': require('./src/assets/WorkSans-SemiBold.ttf'), // Usado para headline-lg y headline-md
-          'Inter-Regular': require('./src/assets/Inter-Regular.ttf'), // body-lg, body-md
-          'Inter-Medium': require('./src/assets/Inter-Medium.ttf'),   // label-md (peso 500)
-          'Inter-SemiBold': require('./src/assets/Inter-SemiBold.ttf')// title-lg (peso 600)
-        });
-
-        // Aquí en el futuro podríamos cargar tokens de sesión o datos de SQLite
-
-      } catch (e) {
-        console.warn('Error cargando recursos:', e);
-      } finally {
-        // Independientemente de si falla o tiene éxito, marcamos la app como lista
-        setAppIsReady(true);
-      }
+    if (fontsLoaded) {
+      // Aquí en el futuro puedes agregar validaciones de red o tokens de usuario.
+      // Por ahora, si las fuentes cargaron, la app está lista.
+      setAppIsReady(true);
     }
+  }, [fontsLoaded]);
 
-    prepareResources();
-  }, []); // El arreglo vacío [] asegura que esto solo se ejecute una vez al inicio
-
-  // 4. Efecto para ocultar el Splash Screen una vez que la app está lista
-  useEffect(() => {
+  // 5. Función optimizada para ocultar el Splash Screen cuando el UI esté renderizado
+  const onLayoutRootView = useCallback(async () => {
     if (appIsReady) {
-      SplashScreen.hideAsync();
+      await SplashScreen.hideAsync();
     }
   }, [appIsReady]);
 
-  // 5. Renderizado de seguridad preventivo
+  // 6. Pantalla de carga preventiva (Early Return)
   if (!appIsReady) {
-    return <View style={{ flex: 1, backgroundColor: '#F8F9FA' }} />;
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0056B3" />
+      </View>
+    );
   }
 
-  // 6. Retorno del árbol de componentes principal
+  // 7. Retorno del árbol de componentes principal
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
-        <RootNavigator />
-      </NavigationContainer>
+      {/* 8. El View notifica a Expo que ya se dibujó la interfaz y puede quitar el Splash */}
+      <View style={styles.container} onLayout={onLayoutRootView}>
+        <NavigationContainer>
+          <RootNavigator />
+        </NavigationContainer>
+      </View>
     </SafeAreaProvider>
   );
 }
+
+// 9. Estilos
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F8F9FA', // Background Light Gray
+  },
+});
