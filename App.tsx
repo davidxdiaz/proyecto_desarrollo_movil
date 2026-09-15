@@ -1,12 +1,17 @@
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { MainTabNavigator } from './src/navigation/MainTabNavigator';
+import { NavigationContainer } from "@react-navigation/native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { Provider } from "react-redux";
+import { MainTabNavigator } from "./src/navigation/MainTabNavigator";
+import { store } from "./src/store/store";
 
 export default function App() {
   return (
-    // NavigationContainer gestiona el árbol de navegación y el estado de la aplicación
-    <NavigationContainer>
-      <MainTabNavigator />
-    </NavigationContainer>
+    <Provider store={store}>
+      <SafeAreaProvider>
+        <NavigationContainer>
+          <MainTabNavigator />
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </Provider>
   );
 }
