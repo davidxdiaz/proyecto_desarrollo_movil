@@ -1,5 +1,8 @@
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold } from '@expo-google-fonts/inter';
 import { WorkSans_600SemiBold } from '@expo-google-fonts/work-sans';
+import { Provider } from "react-redux";
+import { store } from "./src/store/store";
+
 import { NavigationContainer } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
@@ -12,6 +15,7 @@ import { RootNavigator } from './src/navigation/RootNavigator';
 
 // 1. Retenemos el Splash Screen nativo para que no desaparezca de golpe
 SplashScreen.preventAutoHideAsync();
+
 
 export default function App() {
   // 2. Cargamos las fuentes (Hook en el nivel superior cumpliendo las Reglas de React)
@@ -52,6 +56,7 @@ export default function App() {
 
   // 7. Retorno del árbol de componentes principal
   return (
+    <Provider store={store}>
     <SafeAreaProvider>
       {/* 8. El View notifica a Expo que ya se dibujó la interfaz y puede quitar el Splash */}
       <View style={styles.container} onLayout={onLayoutRootView}>
@@ -60,8 +65,11 @@ export default function App() {
         </NavigationContainer>
       </View>
     </SafeAreaProvider>
+    </Provider>
+
   );
 }
+
 
 // 9. Estilos
 const styles = StyleSheet.create({
@@ -75,3 +83,4 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F9FA', // Background Light Gray
   },
 });
+

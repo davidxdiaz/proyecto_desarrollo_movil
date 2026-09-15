@@ -1,5 +1,9 @@
 import React from 'react';
+<<<<<<< HEAD
+import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
+=======
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity } from 'react-native';
+>>>>>>> 9bdd89ac84f452138e0d39c25fd20872bf33ff48
 
 // 1. Tipado estricto con TypeScript (La "Interfaz")
 export interface CustomButtonProps {
