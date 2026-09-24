@@ -1,5 +1,6 @@
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold } from '@expo-google-fonts/inter';
 import { WorkSans_600SemiBold } from '@expo-google-fonts/work-sans';
+import 'react-native-url-polyfill/auto';
 import { Provider } from "react-redux";
 import { store } from "./src/store/store";
 

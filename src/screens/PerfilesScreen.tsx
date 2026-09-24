@@ -1,32 +1,41 @@
 import { Ionicons } from '@expo/vector-icons';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 // 1. Importaciones de Redux
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { AddProfileModal } from '../components/AddProfileModal';
 import { ProfileCard } from '../components/ProfileCard';
-import { addProfile } from '../store/slices/profilesSlice';
+
+
+import { fetchProfilesFromSupabase } from '../store/slices/profilesSlice';
 import { AppDispatch, RootState } from '../store/store';
 
 export const PerfilesScreen = () => {
+  const [isModalVisible, setModalVisible] = useState(false);
   // 2. Suscripción al estado global
-  const perfilesFamiliares = useSelector((state: RootState) => state.profiles.profiles);
+  const { profiles: perfilesFamiliares, status: loadingStatus } = useSelector((state: RootState) => state.profiles)
   const dispatch = useDispatch<AppDispatch>();
 
-  // 3. Función para despachar acciones
   const handleAddNewProfile = () => {
-    // Simulamos un payload. En producción, esto viene de un formulario.
-    const newProfile = {
-      id: Math.random().toString(),
-      name: 'Zoé', 
-      type: 'pediatric' as const,
-      age: 3,
-      details: 'Pediatra: Dra. Salinas',
-      avatarUrl: 'https://i.pravatar.cc/150?img=5',
-      nextRevision: '15 Oct',
-    };
-    dispatch(addProfile(newProfile));
+    setModalVisible(true);
   };
 
+  useEffect(() => {
+    // Solo hacemos fetch si el estado es 'idle' (inactivo inicial)
+    if (loadingStatus === 'idle') {
+      dispatch(fetchProfilesFromSupabase());
+    }
+  }, [loadingStatus, dispatch]);
+
+  if (loadingStatus === 'loading' && perfilesFamiliares.length === 0) {
+    return (
+      <SafeAreaView style={[styles.container, styles.centerContent]}>
+        <ActivityIndicator size="large" color="#0056B3" />
+        <Text style={styles.loadingText}>Cargando historiales médicos...</Text>
+      </SafeAreaView>
+    );
+  }
   // 4. Renderizado individual para optimizar memoria
   const renderItem = ({ item }: { item: any }) => (
     <ProfileCard
@@ -72,6 +81,10 @@ export const PerfilesScreen = () => {
         contentContainerStyle={styles.scrollContent}
         ListFooterComponent={ListFooter}
         showsVerticalScrollIndicator={false}
+      />
+      <AddProfileModal 
+        visible={isModalVisible} 
+        onClose={() => setModalVisible(false)} 
       />
     </SafeAreaView>
   );
@@ -142,5 +155,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#424752',
     fontWeight: '500',
-  }
+  },
+  centerContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontFamily: 'Inter',
+    marginTop: 16,
+    color: '#424752', // on-surface-variant
+  },
 });
